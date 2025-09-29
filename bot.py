@@ -1,10 +1,12 @@
-mkdir -p ~/adptvbot
-cat > ~/adptvbot/bot.py << 'EOF'
+import os
 import telebot
 from telebot import types
 
-# Ganti dengan token bot kamu
-TOKEN = "8448482018:AAGMj5JrKCkg2fIhjb-D_DR0P-2RggKwczw"
+# === Ambil token dari Environment Variable (Render Dashboard) ===
+TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("⚠️ BOT_TOKEN belum di-set di Environment Variables Render!")
+
 bot = telebot.TeleBot(TOKEN)
 
 # ===== START COMMAND =====
@@ -24,18 +26,15 @@ def start_message(message):
 def menu_handler(message):
     text = message.text
 
-    # === ADMIN ===
     if text == "👤 ADMIN":
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("💬 Hubungi Admin", url="https://t.me/alvasr123"))
         markup.add(types.InlineKeyboardButton("📱 WhatsApp Admin", url="https://wa.me/628123456789"))
         bot.send_message(message.chat.id, "📌 Klik tombol di bawah untuk hubungi admin 👇", reply_markup=markup)
 
-    # === URL PLAYLIST ===
     elif text == "🔗 URL PLAYLIST":
         bot.send_message(message.chat.id, "🔗 Playlist Free IPTV:\nhttps://adptv.short.gy/playlist")
 
-    # === PAKET PLAYLIST ===
     elif text == "📦 PAKET PLAYLIST":
         paket_info = """**Paket IPTV ADP TV Premium**
 
@@ -62,15 +61,12 @@ Pilih paket yang sesuai 👇
 def callback_handler(call):
     data = call.data
 
-    # === PREMIUM ===
     if data == "premium":
-        text = """Varian: Paket Premium  
-Silakan pilih paket Type yang akan di-deploy:"""
+        text = "Varian: Paket Premium\nSilakan pilih paket Type yang akan di-deploy:"
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("PREMIUM", callback_data="premium_list"))
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup)
 
-    # === LIST PREMIUM ===
     elif data == "premium_list":
         text = """== **PILIH PAKET (ADP TV • PREMIUM )** ==
 
@@ -91,7 +87,6 @@ Silakan pilih paket Type yang akan di-deploy:"""
         )
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, parse_mode="Markdown", reply_markup=markup)
 
-    # === DETAIL PAKET ===
     elif data.startswith("paket_"):
         paket = data.split("_")[1]
         harga_map = {
@@ -118,7 +113,6 @@ Silakan pilih paket Type yang akan di-deploy:"""
         markup.add(types.InlineKeyboardButton("💳 Bayar Paket", callback_data=f"bayar_{paket}"))
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, parse_mode="Markdown", reply_markup=markup)
 
-    # === BAYAR (dengan QRIS berbeda) ===
     elif data.startswith("bayar_"):
         paket = data.split("_")[1]
         harga_map = {
@@ -145,25 +139,17 @@ Total Bayar: {harga}
 ⏰ Timeout: 5 menit  
 
 📱 Scan QR ini & bayar Total Bayar."""
+
         try:
             with open(qris_file, "rb") as qr:
                 bot.send_photo(call.message.chat.id, qr, caption=text, parse_mode="Markdown")
         except:
             bot.send_message(call.message.chat.id, f"⚠️ QRIS {paket} bulan belum tersedia.")
 
-        # Tambahkan tombol cek pembayaran
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("🔃 Cek Pembayaran", url="https://wa.me/62895810355575"))
         bot.send_message(call.message.chat.id, "Klik tombol di bawah untuk konfirmasi pembayaran 👇", reply_markup=markup)
 
-
 print("🤖 Bot sedang berjalan...")
 bot.infinity_polling()
-EOF
-
-
-
-
-
-
 
