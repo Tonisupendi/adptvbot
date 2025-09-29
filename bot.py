@@ -3,7 +3,7 @@ import telebot
 from telebot import types
 
 # === Ambil token dari Environment Variable (Render Dashboard) ===
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("8448482018:AAGMj5JrKCkg2fIhjb-D_DR0P-2RggKwczw")
 if not TOKEN:
     raise ValueError("⚠️ BOT_TOKEN belum di-set di Environment Variables Render!")
 
